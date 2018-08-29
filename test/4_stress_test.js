@@ -1,6 +1,7 @@
 const path = require('path');
 const Promise = require('bluebird');
 
+const KYC = artifacts.require('./KYC.sol');
 const BasketRegistry = artifacts.require('./BasketRegistry.sol');
 const BasketEscrow = artifacts.require('./BasketEscrow.sol');
 const BasketFactory = artifacts.require('./BasketFactory.sol');
@@ -20,14 +21,15 @@ const {
 
 const doesRevert = err => err.message.includes('revert');
 
-const BUNDLING_GAS_LIMIT = 1e6;
-const DEBUNDLING_GAS_LIMIT = 2e5;
+const BUNDLING_GAS_LIMIT = 2e6;
+const DEBUNDLING_GAS_LIMIT = 5e5;
 
 contract('Basket Factory Limit', (accounts) => {
   // Accounts
   const [ADMINISTRATOR, ARRANGER, MARKETMAKER, HOLDER_A, HOLDER_B, INVALID_ADDRESS] = accounts.slice(0, 6);
 
   // Contract instances
+  let kyc;
   let basketFactory;
   let fee;
 
@@ -41,13 +43,19 @@ contract('Basket Factory Limit', (accounts) => {
   let debundleCount = 0;
 
   describe('stress test basket constructor', () => {
-    before('deploying basketFactory and tokens', async () => {
+    before('deploying basketFactory and tokens and whitelist participants', async () => {
       console.log(`  ================= START TEST [ ${path.basename(__filename)} ] =================`);
 
+      kyc = await KYC.deployed();
       basketFactory = await BasketFactory.deployed();
       fee = await basketFactory.productionFee.call();
       // change fee amount to 0 so that the transaction does not revert due to insufficient funds
       await basketFactory.changeProductionFee(0, { from: ADMINISTRATOR });
+
+      await kyc.whitelistArranger(ARRANGER);
+      await kyc.whitelistHolder(MARKETMAKER);
+      await kyc.whitelistHolder(HOLDER_A);
+      await kyc.whitelistHolder(HOLDER_B);
     });
 
     it('deploy baskets with as many tokens as possible', async () => {

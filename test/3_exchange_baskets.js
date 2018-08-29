@@ -1,6 +1,7 @@
 const path = require('path');
 const Promise = require('bluebird');
 
+const KYC = artifacts.require('./KYC.sol');
 const BasketRegistry = artifacts.require('./BasketRegistry.sol');
 const BasketEscrow = artifacts.require('./BasketEscrow.sol');
 const BasketFactory = artifacts.require('./BasketFactory.sol');
@@ -25,6 +26,7 @@ contract('Basket Escrow', (accounts) => {
   const [ADMINISTRATOR, ARRANGER, MARKET_MAKER, HOLDER_A, HOLDER_B, INVALID_ADDRESS] = accounts.slice(0, 6);
 
   // Contract instances
+  let kyc;
   let basketRegistry;
   let basketFactory;
   let basketEscrow;
@@ -36,15 +38,22 @@ contract('Basket Escrow', (accounts) => {
   const tokenParamsA = [MARKET_MAKER, 'Token A', 'TOKA', DECIMALS, INITIAL_SUPPLY, FAUCET_AMOUNT];
   const tokenParamsB = [MARKET_MAKER, 'Token B', 'TOKB', DECIMALS, INITIAL_SUPPLY, FAUCET_AMOUNT];
 
-  before('Before: deploy contracts', async () => {
+  before('Before: deploy contracts and whitelist all participants', async () => {
     console.log(`  ================= START TEST [ ${path.basename(__filename)} ] =================`);
 
     try {
+      kyc = await KYC.deployed();
       basketRegistry = await BasketRegistry.deployed();
       basketEscrow = await BasketEscrow.deployed();
       basketFactory = await BasketFactory.deployed();
       tokenA = await constructors.TestToken(...tokenParamsA);
       tokenB = await constructors.TestToken(...tokenParamsB);
+
+      await kyc.whitelistHolder(basketEscrow.address);
+      await kyc.whitelistArranger(ARRANGER);
+      await kyc.whitelistHolder(MARKET_MAKER);
+      await kyc.whitelistHolder(HOLDER_A);
+      await kyc.whitelistHolder(HOLDER_B);
     } catch (err) { assert.throw(`Failed to deploy contracts: ${err.toString()}`); }
   });
 
@@ -515,7 +524,7 @@ contract('Basket Escrow', (accounts) => {
         assert.strictEqual(Number(amountBasket), amountBasketsToSell, 'incorrect basket amount');
         assert.strictEqual(seller, MARKET_MAKER, 'incorrect seller');
         assert.strictEqual(basket, basketABAddress, 'incorrect basket address');
-      } catch (err) { assert.throw(`Error creating buy order: ${err.toString()}`); }
+      } catch (err) { assert.throw(`Error creating sell order: ${err.toString()}`); }
     });
 
     it('sends Baskets to escrow contract', async () => {

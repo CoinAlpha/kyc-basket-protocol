@@ -2,6 +2,7 @@ const path = require('path');
 const Promise = require('bluebird');
 
 const BasketFactory = artifacts.require('./BasketFactory.sol');
+const KYC = artifacts.require('./KYC.sol');
 const { abi: basketAbi } = require('../build/contracts/Basket.json');
 const { constructors } = require('../migrations/constructors.js');
 const { web3 } = require('../utils/web3');
@@ -22,6 +23,7 @@ contract('TestToken | Basket', (accounts) => {
   const [ADMINISTRATOR, ARRANGER, MARKETMAKER, HOLDER_A, HOLDER_B] = accounts.slice(0, 5);
 
   // Contract instances
+  let kyc;
   let basketFactory;
   let basketAB;
   let basketABAddress;
@@ -31,13 +33,19 @@ contract('TestToken | Basket', (accounts) => {
   const tokenParamsA = [HOLDER_A, 'Token A', 'TOKA', DECIMALS, INITIAL_SUPPLY, FAUCET_AMOUNT];
   const tokenParamsB = [HOLDER_A, 'Token B', 'TOKB', DECIMALS, INITIAL_SUPPLY, FAUCET_AMOUNT];
 
-  before('Before: deploy tokens', async () => {
+  before('Before: deploy tokens and whitelist all participants', async () => {
     console.log(`  ================= START TEST [ ${path.basename(__filename)} ] =================`);
 
     try {
+      kyc = await KYC.deployed();
       basketFactory = await BasketFactory.deployed();
       tokenA = await constructors.TestToken(...tokenParamsA);
       tokenB = await constructors.TestToken(...tokenParamsB);
+
+      await kyc.whitelistArranger(ARRANGER);
+      await kyc.whitelistHolder(MARKETMAKER);
+      await kyc.whitelistHolder(HOLDER_A);
+      await kyc.whitelistHolder(HOLDER_B);
     } catch (err) {
       assert.throw(`Failed to create Tokens: ${err.toString()}`);
     }

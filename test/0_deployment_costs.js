@@ -23,9 +23,14 @@ let adminBalance;
 
 
 contract('Deployment costs', (accounts) => {
-  const [ADMIN, TOKEN_A, TOKEN_B, USER, REGISTRY, ESCROW] = accounts.slice(6);
+  const [ADMIN, TOKEN_A, TOKEN_B, USER, REGISTRY, KYC, ESCROW] = accounts.slice(7);
 
   before('before: should get starting admin balance', async () => {
+    if (process.env.TEST_COVERAGE) {
+      console.log('SKIPPING THIS TEST IN COVERAGE');
+      return;
+    }
+
     console.log(`  ================= START TEST [ ${path.basename(__filename)} ] =================`);
 
     const _bal = await web3.eth.getBalancePromise(ADMIN);
@@ -68,17 +73,17 @@ contract('Deployment costs', (accounts) => {
     });
 
     it('BasketEscrow cost', async () => {
-      basketFactory = await constructors.BasketEscrow(ADMIN, REGISTRY, ADMIN, TRANSACTION_FEE);
+      basketFactory = await constructors.BasketEscrow(ADMIN, REGISTRY, KYC, ADMIN, TRANSACTION_FEE);
     });
 
     it('BasketFactory cost', async () => {
-      basketFactory = await constructors.BasketFactory(ADMIN, REGISTRY, ADMIN, PRODUCTION_FEE);
+      basketFactory = await constructors.BasketFactory(ADMIN, REGISTRY, KYC, ADMIN, PRODUCTION_FEE);
     });
 
     it('Basket cost', async () => {
       basket = await constructors.Basket(
         ADMIN,
-        'Basket contract', 'BASK', [TOKEN_A, TOKEN_B], [1, 2], REGISTRY, ADMIN, ADMIN, ARRANGER_FEE,
+        'Basket contract', 'BASK', [TOKEN_A, TOKEN_B], [1, 2], REGISTRY, KYC, ADMIN, ADMIN, ARRANGER_FEE,
       );
     });
   });

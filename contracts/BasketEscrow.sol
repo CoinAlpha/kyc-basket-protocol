@@ -20,6 +20,7 @@ pragma solidity 0.4.21;
 import "./zeppelin/SafeMath.sol";
 import "./zeppelin/ERC20.sol";
 import "./BasketRegistry.sol";
+import "./KYC.sol";
 
 /// @title BasketEscrow -- Escrow contract to facilitate trading
 /// @author CoinAlpha, Inc. <contact@coinalpha.com>
@@ -53,6 +54,7 @@ contract BasketEscrow {
 
   // Modules
   IBasketRegistry         public basketRegistry;
+  IKYC                    public kyc;
 
   // Structs
   struct Order {
@@ -68,6 +70,11 @@ contract BasketEscrow {
   // Modifiers
   modifier onlyAdmin {
     require(msg.sender == admin);                       // Check: "Only the admin can call this function"
+    _;
+  }
+
+  modifier onlyWhitelistedHolder {
+    require(kyc.isWhitelistedHolder(msg.sender));       // Check: "Only whitelisted basket holders can call this function"
     _;
   }
 
@@ -87,11 +94,13 @@ contract BasketEscrow {
   /// @param  _transactionFee                            Transaction fee in ETH percentage
   function BasketEscrow(
     address   _basketRegistryAddress,
+    address   _kycAddress,
     address   _transactionFeeRecipient,
     uint      _transactionFee
   ) public {
     basketRegistryAddress = _basketRegistryAddress;
     basketRegistry = IBasketRegistry(_basketRegistryAddress);
+    kyc = IKYC(_kycAddress);
     ETH_ADDRESS = 0;                                     // Use address 0 to indicate Eth
     orderIndex = 1;                                      // Initialize order index at 1
 
@@ -112,7 +121,12 @@ contract BasketEscrow {
     uint      _amountBasket,
     uint      _expiration,
     uint      _nonce
-  ) public payable returns (bool success) {
+  )
+    public
+    payable
+    onlyWhitelistedHolder
+    returns (bool success)
+  {
     uint index = _createOrder(msg.sender, _basketAddress, _amountBasket, ETH_ADDRESS, msg.value, _expiration, _nonce);
 
     emit LogBuyOrderCreated(index, msg.sender, _basketAddress, msg.value, _amountBasket, _expiration, _nonce);
@@ -134,6 +148,7 @@ contract BasketEscrow {
     uint      _nonce
   )
     public
+    onlyWhitelistedHolder
     returns (bool success)
   {
     ERC20(_basketAddress).transferFrom(msg.sender, this, _amountBasket);
@@ -276,7 +291,7 @@ contract BasketEscrow {
     uint      _amountEth,
     uint      _expiration,
     uint      _nonce
-  ) public returns (bool success) {
+  ) public onlyWhitelistedHolder returns (bool success) {
     uint filledOrderIndex = _fillOrder(_orderCreator, _basketAddress, _amountBasket, ETH_ADDRESS, _amountEth, _expiration, _nonce);
     ERC20(_basketAddress).transferFrom(msg.sender, _orderCreator, _amountBasket);
 
@@ -301,7 +316,7 @@ contract BasketEscrow {
     uint      _amountBasket,
     uint      _expiration,
     uint      _nonce
-  ) public payable returns (bool success) {
+  ) public payable onlyWhitelistedHolder returns (bool success) {
     uint filledOrderIndex = _fillOrder(_orderCreator, ETH_ADDRESS, msg.value, _basketAddress, _amountBasket, _expiration, _nonce);
     ERC20(_basketAddress).transfer(msg.sender, _amountBasket);
 

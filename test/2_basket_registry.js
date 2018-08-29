@@ -1,6 +1,7 @@
 const path = require('path');
 const Promise = require('bluebird');
 
+const KYC = artifacts.require('./KYC.sol');
 const BasketRegistry = artifacts.require('./BasketRegistry.sol');
 const BasketFactory = artifacts.require('./BasketFactory.sol');
 const { abi: basketAbi } = require('../build/contracts/Basket.json');
@@ -22,6 +23,7 @@ contract('Basket Factory | Basket Registry', (accounts) => {
   const [ADMINISTRATOR, ARRANGER, MARKETMAKER, HOLDER_A, HOLDER_B, INVALID_ADDRESS] = accounts.slice(0, 6);
 
   // Contract instances
+  let kyc;
   let basketRegistry;
   let basketFactory;
   let basketAB;
@@ -36,10 +38,16 @@ contract('Basket Factory | Basket Registry', (accounts) => {
     console.log(`  ================= START TEST [ ${path.basename(__filename)} ] =================`);
 
     try {
+      kyc = await KYC.deployed();
       basketRegistry = await BasketRegistry.deployed();
       basketFactory = await BasketFactory.deployed();
       tokenA = await constructors.TestToken(...tokenParamsA);
       tokenB = await constructors.TestToken(...tokenParamsB);
+
+      await kyc.whitelistArranger(ARRANGER);
+      await kyc.whitelistHolder(MARKETMAKER);
+      await kyc.whitelistHolder(HOLDER_A);
+      await kyc.whitelistHolder(HOLDER_B);
     } catch (err) { assert.throw(`Failed to deploy contracts: ${err.toString()}`); }
   });
 

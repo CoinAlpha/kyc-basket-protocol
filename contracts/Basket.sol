@@ -22,6 +22,7 @@ import "./zeppelin/StandardToken.sol";
 import "./zeppelin/ERC20.sol";
 
 import "./BasketRegistry.sol";
+import "./KYC.sol";
 
 /// @title Basket -- Basket contract for bundling and debundling tokens
 /// @author CoinAlpha, Inc. <contact@coinalpha.com>
@@ -45,6 +46,7 @@ contract Basket is StandardToken {
 
   // Modules
   IBasketRegistry         public basketRegistry;
+  IKYC                    public kyc;
 
   // Modifiers
   modifier onlyArranger {
@@ -75,6 +77,7 @@ contract Basket is StandardToken {
     address[] _tokens,
     uint[]    _weights,
     address   _basketRegistryAddress,
+    address   _kycAddress,
     address   _arranger,
     address   _arrangerFeeRecipient,
     uint      _arrangerFee                         // in wei, i.e. 1e18 = 1 ETH
@@ -88,6 +91,7 @@ contract Basket is StandardToken {
     weights = _weights;
 
     basketRegistry = IBasketRegistry(_basketRegistryAddress);
+    kyc = IKYC(_kycAddress);
 
     arranger = _arranger;
     arrangerFeeRecipient = _arrangerFeeRecipient;
@@ -100,6 +104,8 @@ contract Basket is StandardToken {
   /// @param  _quantity                            Quantity of basket tokens to mint
   /// @return success                              Operation successful
   function depositAndBundle(uint _quantity) public payable returns (bool success) {
+    require(kyc.isWhitelistedHolder(msg.sender));
+
     for (uint i = 0; i < tokens.length; i++) {
       address t = tokens[i];
       uint w = weights[i];
@@ -212,6 +218,27 @@ contract Basket is StandardToken {
     arrangerFee = _newFee;
 
     emit LogArrangerFeeChange(oldFee, arrangerFee);
+    return true;
+  }
+
+  /// @dev ERC20 transfer with restrictions on receiver
+  /// @param  _to                                  receiver
+  /// @param  _value                               value to be transferred
+  /// @return success                              Operation successful
+  function transfer(address _to, uint256 _value) public returns (bool) {
+    require(kyc.isWhitelistedHolder(_to));
+    super.transfer(_to, _value);
+    return true;
+  }
+
+  /// @dev ERC20 transferFrom with restrictions on receiver
+  /// @param  _from                                sender
+  /// @param  _to                                  receiver
+  /// @param  _value                               value to be transferred
+  /// @return success                              Operation successful
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    require(kyc.isWhitelistedHolder(_to));
+    super.transferFrom(_from, _to, _value);
     return true;
   }
 

@@ -10,6 +10,7 @@ const allArtifacts = {
   // SwappableBasketFactory: artifacts.require('./SwappableBasketFactory.sol'),
   BasketRegistry: artifacts.require('./BasketRegistry.sol'),
   Basket: artifacts.require('./Basket.sol'),
+  KYC: artifacts.require('./KYC.sol'),
 };
 
 // solidity-coverage: fails if gasPrice is specified
@@ -18,19 +19,23 @@ const allArtifacts = {
 const gasObj = process.env.TEST_COVERAGE ? {} : { gasPrice: GAS_PRICE_DEV };
 
 const constructors = {
+  KYC: _owner => allArtifacts.KYC.new(Object.assign({}, { from: _owner }, gasObj)),
+
   BasketRegistry: _owner => allArtifacts.BasketRegistry.new(Object.assign({}, { from: _owner }, gasObj)),
 
-  BasketEscrow: (_owner, _basketRegistryAddress, _transactionFeeRecipient, _transactionFee) =>
+  BasketEscrow: (_owner, _basketRegistryAddress, _kycAddress, _transactionFeeRecipient, _transactionFee) =>
     allArtifacts.BasketEscrow.new(
       _basketRegistryAddress,
+      _kycAddress,
       _transactionFeeRecipient,
       _transactionFee,
       Object.assign({}, { from: _owner }, gasObj),
     ),
 
-  BasketFactory: (_owner, _basketRegistryAddress, _productionFeeRecipient, _productionFee) =>
+  BasketFactory: (_owner, _basketRegistryAddress, _kycAddress, _productionFeeRecipient, _productionFee) =>
     allArtifacts.BasketFactory.new(
       _basketRegistryAddress,
+      _kycAddress,
       _productionFeeRecipient,
       _productionFee,
       Object.assign({}, { from: _owner }, gasObj),
@@ -54,13 +59,14 @@ const constructors = {
       Object.assign({}, { from: _owner }, gasObj),
     ),
 
-  Basket: (_owner, _name, _symbol, _tokens, _weights, _registryAddress, _arranger, _arrangerFeeRecipient, _arrangerFee) =>
+  Basket: (_owner, _name, _symbol, _tokens, _weights, _registryAddress, _kycAddress, _arranger, _arrangerFeeRecipient, _arrangerFee) =>
     allArtifacts.Basket.new(
       _name,
       _symbol,
       _tokens,
       _weights,
       _registryAddress,
+      _kycAddress,
       _arranger,
       _arrangerFeeRecipient,
       _arrangerFee,
