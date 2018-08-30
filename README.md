@@ -1,6 +1,7 @@
-# Basket Protocol
+# KYC Basket Protocol
 
-[![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=basket-protocol)](https://jenkins.coinalpha.com/job/basket-protocol/) [![Coverage Status](https://coveralls.io/repos/github/CoinAlpha/basket-protocol/badge.svg?t=4jqZIE)](https://coveralls.io/github/CoinAlpha/basket-protocol)
+[![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=kyc-basket-protocol)](https://jenkins.coinalpha.com/job/kyc-basket-protocol/)
+[![Coverage Status](https://coveralls.io/repos/github/CoinAlpha/kyc-basket-protocol/badge.svg?t=4jqZIE)](https://coveralls.io/github/CoinAlpha/kyc-basket-protocol)
 
 **A new paradigm for asset management**
 
@@ -111,7 +112,7 @@ The CoinAlpha team, to the extent possible, aims to follow industry best practic
 - [OpenZeppelin contracts](https://github.com/OpenZeppelin/zeppelin-solidity): the Basket Protocol uses some of the standardized and widely accepted OpenZeppelin contracts
 - [ConsenSys: Smart Contract Security Best Practices](https://github.com/ConsenSys/smart-contract-best-practices)
 
-### [Hosho](https://hosho.io) Security Audit 
+### [Hosho](https://hosho.io) Security Audit
 ![Hosho Audited](image/hosho.png)
 - In July 2018, we hired Hosho, a global leader in blockchain security.
 - Our protocol passed Hosho's comprehensive audit.  The full report can be found here: [Hosho Security Audit Report](files/hosho-basket-audit.pdf).
