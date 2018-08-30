@@ -464,7 +464,7 @@ contract('Basket Escrow', (accounts) => {
 
 
   describe('MARKET_MAKER fails to fill expired orders', () => {
-    const timeDelta = 20;   // 10 seconds
+    const timeDelta = 30;   // 10 seconds
     const instantExpiration = (new Date().getTime() / 1000) + timeDelta;
 
     before('creates an order that expires instantly', async () => {
@@ -696,6 +696,22 @@ contract('Basket Escrow', (accounts) => {
       await basketEscrow.changeTransactionFee(NEW_FEE * (10 ** FEE_DECIMALS));
       const transactionFee = await basketEscrow.transactionFee.call();
       assert.strictEqual(Number(transactionFee), Number(NEW_FEE) * (10 ** FEE_DECIMALS), 'transaction fee did not change accordingly');
+    });
+  });
+
+  describe('Disallows order creation when creator is not whitelisted', () => {
+    before('can unwhitelist an existing holder', async () => {
+      await kyc.unWhitelistHolder(HOLDER_A);
+    });
+
+    it('disallows HOLDER_A to create oders', async () => {
+      try {
+        const sellOrderParams = [
+          basketABAddress, amountBasketsToSell, amountEthToGet, expirationInSeconds, nonce,
+          { from: MARKET_MAKER, gas: 1e6 },
+        ];
+        await basketEscrow.createSellOrder(...sellOrderParams);
+      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
     });
   });
 

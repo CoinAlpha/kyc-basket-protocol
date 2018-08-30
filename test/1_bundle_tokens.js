@@ -98,6 +98,26 @@ contract('TestToken | Basket', (accounts) => {
     });
   });
 
+  describe('Disallow creation of new basket from unwhitelisted arrangers', () => {
+    let initialBalance;
+
+    before('Unwhitelist', async () => {
+      try {
+        await kyc.unWhitelistArranger(ARRANGER);
+      } catch (err) { assert.throw(`Error deploying basketAB: ${err.toString()}`); }
+    });
+
+    it('Should fail to deploy the basket', async () => {
+      try {
+        const fee = await basketFactory.productionFee.call();
+        await basketFactory.createBasket(
+          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE,
+          { from: ARRANGER, value: Number(fee) },
+        );
+      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
+    });
+  });
+
   describe('fails to deploy basket when the fee sent is too low', () => {
     let initialBalance;
 
@@ -402,6 +422,28 @@ contract('TestToken | Basket', (accounts) => {
 
         assert.strictEqual(initialBasketBalance, Number(_currentBasketBalance), 'basket balance increased');
         assert.strictEqual(initialFactoryBalance, Number(_currentFactoryBalance), 'basket factory balance increased');
+      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
+    });
+  });
+
+  describe('Fallback', () => {
+    let initialKYCBalance;
+
+    before('Read initial balance', async () => {
+      try {
+        const _initialKYCBalance = await web3.eth.getBalancePromise(kyc.address);
+        initialKYCBalance = Number(_initialKYCBalance);
+      } catch (err) { assert.throw(`Error reading balances: ${err.toString()}`); }
+    });
+
+    it('Rejects any ether sent to contract', async () => {
+      try {
+        web3.eth.sendTransactionPromise({ from: HOLDER_B, to: kyc.address, value: 1e18, data: 1e18 })
+          .catch(() => {});
+
+        const _currentKYCBalance = await web3.eth.getBalancePromise(kyc.address);
+
+        assert.strictEqual(initialKYCBalance, Number(_currentKYCBalance), 'basket registry balance increased');
       } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
     });
   });
