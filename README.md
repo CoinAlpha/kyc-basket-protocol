@@ -1,6 +1,5 @@
 # KYC Basket Protocol
-
-[![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=kyc-basket-protocol)](https://jenkins.coinalpha.com/job/kyc-basket-protocol/)
+[![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=kyc-basket-protocol&build=2)](https://jenkins.coinalpha.com/job/kyc-basket-protocol/2/)
 [![Coverage Status](https://coveralls.io/repos/github/CoinAlpha/kyc-basket-protocol/badge.svg?t=4jqZIE)](https://coveralls.io/github/CoinAlpha/kyc-basket-protocol)
 
 **A new paradigm for asset management**
