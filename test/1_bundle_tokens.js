@@ -20,7 +20,7 @@ const doesRevert = err => err.message.includes('revert');
 
 contract('TestToken | Basket', (accounts) => {
   // Accounts
-  const [ADMINISTRATOR, ARRANGER, MARKETMAKER, HOLDER_A, HOLDER_B] = accounts.slice(0, 5);
+  const [ADMINISTRATOR, ARRANGER, MARKETMAKER, HOLDER_A, HOLDER_B, UNWHITELISTED] = accounts.slice(0, 6);
 
   // Contract instances
   let kyc;
@@ -394,6 +394,28 @@ contract('TestToken | Basket', (accounts) => {
 
     it('should allow HOLDER_A to depositAndBundle', async () => {
       await basketAB.depositAndBundlePromise(amount1, { from: HOLDER_A, value: 0, gas: 1e6 });
+    });
+  });
+
+  describe('Disallow basket transfers to unwhitelisted parties', () => {
+    const amtToTransfer = 1e17;
+
+    before('Approve basket transfer', async () => {
+      try {
+        await basketAB.approve(UNWHITELISTED, amtToTransfer, { from: HOLDER_A });
+      } catch (err) { assert.throw(`Error retrieving basketAB contract data: ${err.toString()}`); }
+    });
+
+    it('Should fail to transfer baskets to unwhitelisted address', async () => {
+      try {
+        await basketAB.transfer(UNWHITELISTED, amtToTransfer, { from: HOLDER_A });
+      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
+    });
+
+    it('Should fail to transfer baskets from any to unwhitelisted address', async () => {
+      try {
+        await basketAB.transferFrom(HOLDER_A, UNWHITELISTED, amtToTransfer, { from: HOLDER_A });
+      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
     });
   });
 

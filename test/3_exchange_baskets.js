@@ -464,7 +464,7 @@ contract('Basket Escrow', (accounts) => {
 
 
   describe('MARKET_MAKER fails to fill expired orders', () => {
-    const timeDelta = 30;   // 10 seconds
+    const timeDelta = 60;   // 10 seconds
     const instantExpiration = (new Date().getTime() / 1000) + timeDelta;
 
     before('creates an order that expires instantly', async () => {
