@@ -13,6 +13,7 @@ const {
   DECIMALS,
   INITIAL_SUPPLY,
   FAUCET_AMOUNT,
+  ZERO_ADDRESS,
 } = require('../config');
 
 
@@ -124,6 +125,68 @@ contract('TestToken | Basket', (accounts) => {
           { from: ARRANGER, value: Number(fee) },
         );
       } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
+    });
+  });
+
+  const amountToBundle = '1000000000000000000';
+  const amtToTransfer = '300000000000000';
+  let basketZeroAddress, basketZero;
+
+  describe('deploy basket with ZERO_ADDRESS as kyc address', () => {
+    it('deploy the basket', async () => {
+      try {
+        const fee = await basketFactory.productionFee.call();
+        const initialBalance = await web3.eth.getBalancePromise(ARRANGER);
+        const txObj = await basketFactory.createBasket(
+          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, 0, ZERO_ADDRESS,
+          { from: ARRANGER, value: Number(fee) },
+        );
+
+        const txLogs = txObj.logs;
+        // Check logs to ensure contract was created
+        const txLog = txLogs[0];
+        assert.strictEqual(txLogs.length, 1, 'incorrect number of logs');
+        assert.strictEqual(txLog.event, 'LogBasketCreated', 'incorrect event label');
+
+        const { basketAddress, arranger: _arranger, fee: feeFromEvent } = txLog.args;
+        basketZeroAddress = basketAddress;
+        // Get basketZero instance
+        const newContract = web3.eth.contract(basketAbi);
+        basketZero = newContract.at(basketZeroAddress);
+        Promise.promisifyAll(basketZero, { suffix: 'Promise' });
+        const balA = await tokenA.balanceOf(HOLDER_A);
+        const balB = await tokenB.balanceOf(HOLDER_A);
+      } catch (err) { assert.throw(`Error deploying basketZero: ${err.toString()}`); }
+    });
+
+    it('Approve token transfer', async () => {
+      try {
+        await tokenA.approve(basketZeroAddress, 1e19, { from: HOLDER_A });
+        await tokenB.approve(basketZeroAddress, 1e19, { from: HOLDER_A });
+      } catch (err) { assert.throw(`Error approving token transfer: ${err.toString()}`); }
+    });
+  });
+
+  describe('allow minting and transfer', () => {
+    it('should allow HOLDER_A to deposit and bundle tokens without whitelisting', async () => {
+      await basketZero.depositAndBundlePromise(
+        amountToBundle,
+        { from: HOLDER_A, value: 0, gas: 5e6 },
+      )
+        .catch(err => assert.throw(`Error depositing and bundling ${err.toString()}`));
+    });
+
+    it('Should allow transfer baskets to unwhitelisted address', async () => {
+      try {
+        await basketZero.transfer(UNWHITELISTED, amtToTransfer, { from: HOLDER_A });
+      } catch (err) { assert.throw(`Error transferring basketZero: ${err.toString()}`); }
+    });
+
+    it('Approve basket transfer', async () => {
+      try {
+        await basketZero.approve(basketZeroAddress, amtToTransfer, { from: HOLDER_A });
+        await basketZero.approve(UNWHITELISTED, amtToTransfer, { from: HOLDER_A });
+      } catch (err) { assert.throw(`Error retrieving basketZero contract data: ${err.toString()}`); }
     });
   });
 

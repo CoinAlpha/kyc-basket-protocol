@@ -92,9 +92,11 @@ contract Basket is StandardToken {
     weights = _weights;
 
     basketRegistry = IBasketRegistry(_basketRegistryAddress);
+    kyc = IKYC(_kycAddress);
     if (_kycAddress != address(0)) {
-      kyc = IKYC(_kycAddress);
       kycEnabled = true;
+    } else {
+      kycEnabled = false;
     }
 
     arranger = _arranger;
