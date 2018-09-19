@@ -39,6 +39,7 @@ contract Basket is StandardToken {
   address                 public arranger;
   address                 public arrangerFeeRecipient;
   uint                    public arrangerFee;
+  bool                    public kycEnabled;
 
   // mapping of token addresses to mapping of account balances
   // ADDRESS USER  || ADDRESS TOKEN || UINT BALANCE
@@ -91,7 +92,10 @@ contract Basket is StandardToken {
     weights = _weights;
 
     basketRegistry = IBasketRegistry(_basketRegistryAddress);
-    kyc = IKYC(_kycAddress);
+    if (_kycAddress != address(0)) {
+      kyc = IKYC(_kycAddress);
+      kycEnabled = true;
+    }
 
     arranger = _arranger;
     arrangerFeeRecipient = _arrangerFeeRecipient;
@@ -104,7 +108,7 @@ contract Basket is StandardToken {
   /// @param  _quantity                            Quantity of basket tokens to mint
   /// @return success                              Operation successful
   function depositAndBundle(uint _quantity) public payable returns (bool success) {
-    require(kyc.isWhitelistedHolder(msg.sender));
+    if (kycEnabled) require(kyc.isWhitelistedHolder(msg.sender));
 
     for (uint i = 0; i < tokens.length; i++) {
       address t = tokens[i];
@@ -226,7 +230,7 @@ contract Basket is StandardToken {
   /// @param  _value                               value to be transferred
   /// @return success                              Operation successful
   function transfer(address _to, uint256 _value) public returns (bool) {
-    require(kyc.isWhitelistedHolder(_to));
+    if (kycEnabled) require(kyc.isWhitelistedHolder(_to));
     super.transfer(_to, _value);
     return true;
   }
@@ -237,7 +241,7 @@ contract Basket is StandardToken {
   /// @param  _value                               value to be transferred
   /// @return success                              Operation successful
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    require(kyc.isWhitelistedHolder(_to));
+    if (kycEnabled) require(kyc.isWhitelistedHolder(_to));
     super.transferFrom(_from, _to, _value);
     return true;
   }

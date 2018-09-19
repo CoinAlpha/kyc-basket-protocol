@@ -52,7 +52,6 @@ contract('Basket Factory Limit', (accounts) => {
       // change fee amount to 0 so that the transaction does not revert due to insufficient funds
       await basketFactory.changeProductionFee(0, { from: ADMINISTRATOR });
 
-      await kyc.whitelistArranger(ARRANGER);
       await kyc.whitelistHolder(MARKETMAKER);
       await kyc.whitelistHolder(HOLDER_A);
       await kyc.whitelistHolder(HOLDER_B);
@@ -81,7 +80,7 @@ contract('Basket Factory Limit', (accounts) => {
           tokenAddressArray.push(token.address);
           weightArray.push(1e18);
           const txObj = await basketFactory.createBasket(
-            'A1B1', 'BASK', tokenAddressArray, weightArray, ARRANGER, 0,
+            'A1B1', 'BASK', tokenAddressArray, weightArray, ARRANGER, 0, kyc.address,
             // charge 0 arranger fee
             { from: ARRANGER },
           );

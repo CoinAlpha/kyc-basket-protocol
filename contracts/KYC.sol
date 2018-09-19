@@ -20,7 +20,6 @@ pragma solidity 0.4.21;
 import "./zeppelin/Ownable.sol";
 
 contract IKYC {
-  function isWhitelistedArranger (address) public view returns (bool) {}
   function isWhitelistedHolder (address) public view returns (bool) {}
 }
 
@@ -28,12 +27,9 @@ contract IKYC {
 /// @author CoinAlpha, Inc. <contact@coinalpha.com>
 contract KYC is Ownable {
   // Mappings
-  mapping(address => bool) public whitelistedArrangers;
   mapping(address => bool) public whitelistedHolders;
 
   // Events
-  event LogWhitelistArranger(address indexed whitelistedArranger);
-  event LogUnwhitelistArranger(address indexed unwhitelistedArranger);
   event LogWhitelistHolder(address indexed whitelistedHolder);
   event LogUnwhitelistHolder(address indexed unwhitelistedHolder);
 
@@ -42,36 +38,11 @@ contract KYC is Ownable {
     owner = msg.sender;
   }
 
-  /// @dev Check if address is a whitelisted arranger
-  /// @param  _arranger                            arranger address
-  /// @return success                              is whitelisted
-  function isWhitelistedArranger(address _arranger) public view returns (bool) {
-    return whitelistedArrangers[_arranger];
-  }
-
   /// @dev Check if address is a whitelisted holder
   /// @param  _holder                              holder address
   /// @return success                              is whitelisted
   function isWhitelistedHolder(address _holder) public view returns (bool) {
     return whitelistedHolders[_holder];
-  }
-
-  /// @dev Whitelist an address to become an arranger
-  /// @param  _addressToWhitelist                  address to be whitelisted
-  /// @return success                              Operation successful
-  function whitelistArranger(address _addressToWhitelist) public onlyOwner returns (bool) {
-    whitelistedArrangers[_addressToWhitelist] = true;
-    emit LogWhitelistArranger(_addressToWhitelist);
-    return true;
-  }
-
-  /// @dev Remove an address from whitelisted arrangers
-  /// @param  _addressToUnwhitelist                address to remove from whitelist
-  /// @return success                              Operation successful
-  function unWhitelistArranger(address _addressToUnwhitelist) public onlyOwner returns (bool) {
-    whitelistedArrangers[_addressToUnwhitelist] = false;
-    emit LogUnwhitelistArranger(_addressToUnwhitelist);
-    return true;
   }
 
   /// @dev Whitelist an address to become a holder

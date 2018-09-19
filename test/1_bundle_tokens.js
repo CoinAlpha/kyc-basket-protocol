@@ -42,7 +42,6 @@ contract('TestToken | Basket', (accounts) => {
       tokenA = await constructors.TestToken(...tokenParamsA);
       tokenB = await constructors.TestToken(...tokenParamsB);
 
-      await kyc.whitelistArranger(ARRANGER);
       await kyc.whitelistHolder(MARKETMAKER);
       await kyc.whitelistHolder(HOLDER_A);
       await kyc.whitelistHolder(HOLDER_B);
@@ -73,7 +72,7 @@ contract('TestToken | Basket', (accounts) => {
         const fee = await basketFactory.productionFee.call();
         initialBalance = await web3.eth.getBalancePromise(ARRANGER);
         const txObj = await basketFactory.createBasket(
-          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE,
+          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE, kyc.address,
           { from: ARRANGER, value: Number(fee) },
         );
 
@@ -98,26 +97,6 @@ contract('TestToken | Basket', (accounts) => {
     });
   });
 
-  describe('Disallow creation of new basket from unwhitelisted arrangers', () => {
-    let initialBalance;
-
-    before('Unwhitelist', async () => {
-      try {
-        await kyc.unWhitelistArranger(ARRANGER);
-      } catch (err) { assert.throw(`Error deploying basketAB: ${err.toString()}`); }
-    });
-
-    it('Should fail to deploy the basket', async () => {
-      try {
-        const fee = await basketFactory.productionFee.call();
-        await basketFactory.createBasket(
-          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE,
-          { from: ARRANGER, value: Number(fee) },
-        );
-      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
-    });
-  });
-
   describe('fails to deploy basket when the fee sent is too low', () => {
     let initialBalance;
 
@@ -126,7 +105,7 @@ contract('TestToken | Basket', (accounts) => {
         const fee = await basketFactory.productionFee.call();
         initialBalance = await web3.eth.getBalancePromise(ARRANGER);
         await basketFactory.createBasket(
-          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE,
+          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE, kyc.address,
           { from: ARRANGER, value: Number(fee) / 2 },
         );
       } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
@@ -141,7 +120,7 @@ contract('TestToken | Basket', (accounts) => {
         const fee = await basketFactory.productionFee.call();
         initialBalance = await web3.eth.getBalancePromise(ARRANGER);
         await basketFactory.createBasket(
-          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18], ARRANGER, ARRANGER_FEE,
+          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18], ARRANGER, ARRANGER_FEE, kyc.address,
           { from: ARRANGER, value: Number(fee) },
         );
       } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
