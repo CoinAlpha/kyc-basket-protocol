@@ -36,7 +36,7 @@ module.exports = (deployer, network, accounts) => {
     // 3. Deploy BasketFactory contract with basketRegistry address
     // BasketFactory(_basketRegistryAddress, _productionFeeRecipient, _productionFee)
     .then(() => deployer.deploy(
-      BasketFactory, basketRegistry.address, kyc.address, ADMINISTRATOR, PRODUCTION_FEE,
+      BasketFactory, basketRegistry.address, ADMINISTRATOR, PRODUCTION_FEE,
       { from: ADMINISTRATOR },
     ))
     .then(() => BasketFactory.deployed())

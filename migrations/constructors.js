@@ -32,10 +32,9 @@ const constructors = {
       Object.assign({}, { from: _owner }, gasObj),
     ),
 
-  BasketFactory: (_owner, _basketRegistryAddress, _kycAddress, _productionFeeRecipient, _productionFee) =>
+  BasketFactory: (_owner, _basketRegistryAddress, _productionFeeRecipient, _productionFee) =>
     allArtifacts.BasketFactory.new(
       _basketRegistryAddress,
-      _kycAddress,
       _productionFeeRecipient,
       _productionFee,
       Object.assign({}, { from: _owner }, gasObj),

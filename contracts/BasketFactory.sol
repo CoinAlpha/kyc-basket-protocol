@@ -20,7 +20,6 @@ pragma solidity 0.4.21;
 import "./zeppelin/SafeMath.sol";
 import "./Basket.sol";
 import "./BasketRegistry.sol";
-import "./KYC.sol";
 
 /**
   * @title BasketFactory -- Factory contract for creating different baskets
@@ -31,14 +30,12 @@ contract BasketFactory {
 
   address                       public admin;
   address                       public basketRegistryAddress;
-  address                       public kycAddress;
 
   address                       public productionFeeRecipient;
   uint                          public productionFee;
 
   // Modules
   IBasketRegistry               public basketRegistry;
-  IKYC                          public kyc;
 
   // Modifiers
   modifier onlyAdmin {
@@ -55,7 +52,6 @@ contract BasketFactory {
   /// @param  _basketRegistryAddress               Address of basket registry
   function BasketFactory(
     address   _basketRegistryAddress,
-    address   _kycAddress,
     address   _productionFeeRecipient,
     uint      _productionFee
   ) public {
@@ -63,8 +59,6 @@ contract BasketFactory {
 
     basketRegistryAddress = _basketRegistryAddress;
     basketRegistry = IBasketRegistry(_basketRegistryAddress);
-    kyc = IKYC(_kycAddress);
-    kycAddress = _kycAddress;
 
     productionFeeRecipient = _productionFeeRecipient;
     productionFee = _productionFee;
@@ -77,6 +71,7 @@ contract BasketFactory {
   /// @param  _weights                             Weight ratio addresses of new basket
   /// @param  _arrangerFeeRecipient                Address to send arranger fees
   /// @param  _arrangerFee                         Amount of arranger fee to charge per basket minted
+  /// @param  _kycAddress                          Address of the kyc contract
   /// @return deployed basket
   function createBasket(
     string    _name,
@@ -84,14 +79,13 @@ contract BasketFactory {
     address[] _tokens,
     uint[]    _weights,
     address   _arrangerFeeRecipient,
-    uint      _arrangerFee
+    uint      _arrangerFee,
+    address   _kycAddress
   )
     public
     payable
     returns (address newBasket)
   {
-    // Arranger must be whitelisted
-    require(kyc.isWhitelistedArranger(msg.sender));
     // charging arrangers a fee to deploy new basket
     require(msg.value >= productionFee);           // Check: "Insufficient ETH for basket creation fee"
     productionFeeRecipient.transfer(msg.value);
@@ -102,7 +96,7 @@ contract BasketFactory {
       _tokens,
       _weights,
       basketRegistryAddress,
-      kycAddress,
+      _kycAddress,
       msg.sender,                                  // arranger address
       _arrangerFeeRecipient,
       _arrangerFee
