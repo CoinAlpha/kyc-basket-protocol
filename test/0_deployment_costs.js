@@ -23,7 +23,7 @@ let adminBalance;
 
 
 contract('Deployment costs', (accounts) => {
-  const [ADMIN, TOKEN_A, TOKEN_B, USER, REGISTRY, KYC, ESCROW] = accounts.slice(7);
+  const [ADMIN, TOKEN_A, TOKEN_B, USER, REGISTRY, KYC, ESCROW, KYC_ADMIN] = accounts.slice(8);
 
   before('before: should get starting admin balance', async () => {
     if (process.env.TEST_COVERAGE) {
@@ -68,6 +68,10 @@ contract('Deployment costs', (accounts) => {
   });
 
   describe('Calculate cost', () => {
+    it('KYC cost', async () => {
+      basketFactory = await constructors.KYC(ADMIN, KYC_ADMIN);
+    });
+
     it('BasketRegistry cost', async () => {
       basketFactory = await constructors.BasketRegistry(ADMIN);
     });
@@ -78,6 +82,10 @@ contract('Deployment costs', (accounts) => {
 
     it('BasketFactory cost', async () => {
       basketFactory = await constructors.BasketFactory(ADMIN, REGISTRY, KYC, ADMIN, PRODUCTION_FEE);
+    });
+
+    it('BasketFactory cost', async () => {
+      basketFactory = await constructors.KYC(ADMIN, REGISTRY, KYC, ADMIN, PRODUCTION_FEE);
     });
 
     it('Basket cost', async () => {

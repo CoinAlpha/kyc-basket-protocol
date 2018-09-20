@@ -19,7 +19,7 @@ const allArtifacts = {
 const gasObj = process.env.TEST_COVERAGE ? {} : { gasPrice: GAS_PRICE_DEV };
 
 const constructors = {
-  KYC: _owner => allArtifacts.KYC.new(Object.assign({}, { from: _owner }, gasObj)),
+  KYC: (_owner, _admin) => allArtifacts.KYC.new(_admin, Object.assign({}, { from: _owner }, gasObj)),
 
   BasketRegistry: _owner => allArtifacts.BasketRegistry.new(Object.assign({}, { from: _owner }, gasObj)),
 

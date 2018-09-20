@@ -26,16 +26,27 @@ contract IKYC {
 /// @title KYCWhitelist -- Whitelist contract to limit participants to KYCed individuals, to ensure legal compliance
 /// @author CoinAlpha, Inc. <contact@coinalpha.com>
 contract KYC is Ownable {
+  // public variables
+  address                 public admin;
+
+  // Modifiers
+  modifier onlyOwnerOrAdmin {
+    require(msg.sender == admin || msg.sender == owner);  // Check: "Only the owner or permissied admin can call this function"
+    _;
+  }
+
   // Mappings
   mapping(address => bool) public whitelistedHolders;
 
   // Events
   event LogWhitelistHolder(address indexed whitelistedHolder);
   event LogUnwhitelistHolder(address indexed unwhitelistedHolder);
+  event LogSetAdmin(address indexed oldAdmin, address indexed newAdmin);
 
   /// @dev KYC constructor
-  function KYC() public {
+  function KYC(address _admin) public {
     owner = msg.sender;
+    admin = _admin;
   }
 
   /// @dev Check if address is a whitelisted holder
@@ -48,7 +59,7 @@ contract KYC is Ownable {
   /// @dev Whitelist an address to become a holder
   /// @param  _addressToWhitelist                  address to be whitelisted
   /// @return success                              Operation successful
-  function whitelistHolder(address _addressToWhitelist) public onlyOwner returns (bool) {
+  function whitelistHolder(address _addressToWhitelist) public onlyOwnerOrAdmin returns (bool) {
     whitelistedHolders[_addressToWhitelist] = true;
     emit LogWhitelistHolder(_addressToWhitelist);
     return true;
@@ -57,9 +68,19 @@ contract KYC is Ownable {
   /// @dev Remove an address from whitelisted holders
   /// @param  _addressToUnwhitelist                address to remove from whitelist
   /// @return success                              Operation successful
-  function unWhitelistHolder(address _addressToUnwhitelist) public onlyOwner returns (bool) {
+  function unWhitelistHolder(address _addressToUnwhitelist) public onlyOwnerOrAdmin returns (bool) {
     whitelistedHolders[_addressToUnwhitelist] = false;
     emit LogUnwhitelistHolder(_addressToUnwhitelist);
+    return true;
+  }
+
+  /// @dev Set the permission admin to another address
+  /// @param  _newAdmin                            new admin address
+  /// @return success                              Operation successful
+  function setAdmin(address _newAdmin) public onlyOwner returns (bool) {
+    address oldAdmin = admin;
+    admin = _newAdmin;
+    emit LogSetAdmin(oldAdmin, _newAdmin);
     return true;
   }
 

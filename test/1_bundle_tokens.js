@@ -490,28 +490,6 @@ contract('TestToken | Basket', (accounts) => {
     });
   });
 
-  describe('Fallback', () => {
-    let initialKYCBalance;
-
-    before('Read initial balance', async () => {
-      try {
-        const _initialKYCBalance = await web3.eth.getBalancePromise(kyc.address);
-        initialKYCBalance = Number(_initialKYCBalance);
-      } catch (err) { assert.throw(`Error reading balances: ${err.toString()}`); }
-    });
-
-    it('Rejects any ether sent to contract', async () => {
-      try {
-        web3.eth.sendTransactionPromise({ from: HOLDER_B, to: kyc.address, value: 1e18, data: 1e18 })
-          .catch(() => {});
-
-        const _currentKYCBalance = await web3.eth.getBalancePromise(kyc.address);
-
-        assert.strictEqual(initialKYCBalance, Number(_currentKYCBalance), 'basket registry balance increased');
-      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
-    });
-  });
-
   describe('Allows burn and withdraw tokens individually', async () => {
     let balTokenA, balTokenB, balBasketAB;
     const amountToDebundle = 5e18;

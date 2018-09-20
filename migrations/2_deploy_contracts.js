@@ -8,13 +8,13 @@ const { TRANSACTION_FEE, PRODUCTION_FEE, SWAPPABLE_PRODUCTION_FEE } = require('.
 
 module.exports = (deployer, network, accounts) => {
   // Accounts
-  const ADMINISTRATOR = accounts[0];    // Protocol administrator, BasketFactory deployer
+  const [ADMINISTRATOR, KYC_ADMIN] = accounts;    // Protocol administrator, BasketFactory deployer
 
   // Contract instances
   let kyc, basketRegistry, basketEscrow, basketFactory, swappableBasketFactory;
 
   // 0. Deploy KYC contract
-  deployer.deploy(KYC, { from: ADMINISTRATOR })
+  deployer.deploy(KYC, KYC_ADMIN, { from: ADMINISTRATOR })
     .then(() => KYC.deployed())
     .then(_instance => kyc = _instance)
     .then(() => { console.log(kyc.address); })
