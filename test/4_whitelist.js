@@ -13,7 +13,7 @@ const doesRevert = err => err.message.includes('revert');
 
 contract('KYC', (accounts) => {
   // Accounts
-  const [ADMINISTRATOR, KYC_ADMIN, NEW_ADMIN] = accounts.slice(0, 6);
+  const [ADMINISTRATOR, KYC_ADMIN, NEW_ADMIN, ADDRESS_TO_WHITELIST, RANDOM] = accounts.slice(0, 6);
 
   // Contract instances
   let kyc;
@@ -41,8 +41,27 @@ contract('KYC', (accounts) => {
         assert.strictEqual(event, 'LogSetAdmin', 'Wrong event fired');
         assert.strictEqual(args.oldAdmin, oldAdmin, 'old admin is not as expected');
         assert.strictEqual(args.newAdmin, NEW_ADMIN, 'admin has not been set to new admin');
-        console.log(args);
       } catch (err) { assert.throw(`Failed to deploy contracts: ${err.toString()}`); }
+    });
+  });
+
+  describe('Allows whitelisting holders', () => {
+    it('Owner of contract can whitelist holders', async () => {
+      try {
+        const txLogs = await kyc.whitelistHolder(ADDRESS_TO_WHITELIST, { from: ADMINISTRATOR });
+      } catch (err) { assert.throw(`Owner failed to whitelist holder: ${err.toString()}`); }
+    });
+
+    it('Admin can whitelist holders', async () => {
+      try {
+        const txLogs = await kyc.whitelistHolder(ADDRESS_TO_WHITELIST, { from: NEW_ADMIN });
+      } catch (err) { assert.throw(`Owner failed to whitelist holder: ${err.toString()}`); }
+    });
+
+    it('Cannot whitelist holder from random address', async () => {
+      try {
+        const txLogs = await kyc.whitelistHolder(ADDRESS_TO_WHITELIST, { from: RANDOM });
+      } catch (err) { assert.equal(doesRevert(err), true, 'did not revert as expected'); }
     });
   });
 
