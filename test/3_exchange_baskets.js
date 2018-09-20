@@ -50,7 +50,6 @@ contract('Basket Escrow', (accounts) => {
       tokenB = await constructors.TestToken(...tokenParamsB);
 
       await kyc.whitelistHolder(basketEscrow.address);
-      await kyc.whitelistArranger(ARRANGER);
       await kyc.whitelistHolder(MARKET_MAKER);
       await kyc.whitelistHolder(HOLDER_A);
       await kyc.whitelistHolder(HOLDER_B);
@@ -72,7 +71,7 @@ contract('Basket Escrow', (accounts) => {
     it('deploys the basket correctly', async () => {
       try {
         const txObj = await basketFactory.createBasket(
-          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE,
+          'A1B1', 'BASK', [tokenA.address, tokenB.address], [1e18, 1e18], ARRANGER, ARRANGER_FEE, kyc.address,
           { from: ARRANGER, value: PRODUCTION_FEE },
         );
         const txLog = txObj.logs[0];
