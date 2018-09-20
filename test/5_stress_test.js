@@ -24,7 +24,7 @@ const doesRevert = err => err.message.includes('revert');
 const BUNDLING_GAS_LIMIT = 2e6;
 const DEBUNDLING_GAS_LIMIT = 5e5;
 
-contract('Basket Factory Limit', (accounts) => {
+contract('Stress test', (accounts) => {
   // Accounts
   const [ADMINISTRATOR, ARRANGER, MARKETMAKER, HOLDER_A, HOLDER_B, INVALID_ADDRESS] = accounts.slice(0, 6);
 
