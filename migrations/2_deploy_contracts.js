@@ -8,7 +8,12 @@ const { TRANSACTION_FEE, PRODUCTION_FEE, SWAPPABLE_PRODUCTION_FEE } = require('.
 
 module.exports = (deployer, network, accounts) => {
   // Accounts
-  const [ADMINISTRATOR, KYC_ADMIN] = accounts;    // Protocol administrator, BasketFactory deployer
+  const [ADMINISTRATOR] = accounts;    // Protocol administrator, BasketFactory deployer
+
+  // For testnet deployment, set KYC_ADMIN to contract Owner
+  // For mainnet deployment, set KYC_ADMIN to whitelist controller address
+  // (you can also set it to ADMINISTRATOR first, and then call setAdmin() to change it)
+  const KYC_ADMIN = ADMINISTRATOR;
 
   // Contract instances
   let kyc, basketRegistry, basketEscrow, basketFactory, swappableBasketFactory;

@@ -440,8 +440,6 @@ contract('TestToken | Basket', (accounts) => {
   });
 
   describe('Disallow basket transfers to unwhitelisted parties', () => {
-    const amtToTransfer = 1e17;
-
     before('Approve basket transfer', async () => {
       try {
         await basketAB.approve(UNWHITELISTED, amtToTransfer, { from: HOLDER_A });
