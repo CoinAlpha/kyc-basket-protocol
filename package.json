@@ -9,7 +9,9 @@
     "coverage": "TEST_COVERAGE=true npm run sol-cov:local",
     "coverage:prod": "TEST_COVERAGE=true npm run sol-cov:coveralls",
     "sol-cov:coveralls": "rm -rf build && ./node_modules/.bin/solidity-coverage && cat coverage/lcov.info | coveralls",
-    "sol-cov:local": "rm -rf build && ./node_modules/.bin/solidity-coverage"
+    "sol-cov:local": "rm -rf build && ./node_modules/.bin/solidity-coverage",
+    "deploy:ropsten": "rm -rf build && truffle compile && truffle migrate --reset --network ropsten",
+    "deploy:mainnet": "rm -rf build && truffle compile && truffle migrate --reset --network mainnet"
   },
   "repository": {
     "type": "git",

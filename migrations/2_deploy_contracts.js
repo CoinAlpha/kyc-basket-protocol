@@ -3,23 +3,23 @@ const BasketFactory = artifacts.require('./BasketFactory.sol');
 const BasketRegistry = artifacts.require('./BasketRegistry.sol');
 const BasketEscrow = artifacts.require('./BasketEscrow.sol');
 const KYC = artifacts.require('./KYC.sol');
-const { TRANSACTION_FEE, PRODUCTION_FEE, SWAPPABLE_PRODUCTION_FEE } = require('../config');
-
+const { TRANSACTION_FEE, PRODUCTION_FEE, SWAPPABLE_PRODUCTION_FEE, DEPLOYER_ADDRESS, KYC_ADMIN } = require('../config');
 
 module.exports = (deployer, network, accounts) => {
   // Accounts
-  const [ADMINISTRATOR] = accounts;    // Protocol administrator, BasketFactory deployer
+  const owner = (network === 'test' || network === 'development') ? accounts[0] : DEPLOYER_ADDRESS;
+  const kycAdmin = (network === 'test' || network === 'development') ? accounts[0] : KYC_ADMIN;
+  const ADMINISTRATOR = owner;    // Protocol administrator, BasketFactory deployer
 
   // For testnet deployment, set KYC_ADMIN to contract Owner
   // For mainnet deployment, set KYC_ADMIN to whitelist controller address
   // (you can also set it to ADMINISTRATOR first, and then call setAdmin() to change it)
-  const KYC_ADMIN = ADMINISTRATOR;
 
   // Contract instances
   let kyc, basketRegistry, basketEscrow, basketFactory, swappableBasketFactory;
 
   // 0. Deploy KYC contract
-  deployer.deploy(KYC, KYC_ADMIN, { from: ADMINISTRATOR })
+  deployer.deploy(KYC, kycAdmin, { from: ADMINISTRATOR })
     .then(() => KYC.deployed())
     .then(_instance => kyc = _instance)
     .then(() => { console.log(kyc.address); })
