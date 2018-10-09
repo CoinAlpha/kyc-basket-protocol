@@ -7,7 +7,7 @@ This branch builds off of CoinAlpha's base [Basket Protocol](https://github.com/
 
 This KYC version of the Basket Protocol adds whitelisting functionality: a protocol administrator (`owner`) and another authorized party, the `KYC Admin`, have the ability to whitelist Ethereum addresses which will be allowed to hold Basket Tokens.  Only Ethereum addresses that have been whitelisted will be able to hold Basket Tokens; any transfers to or transactions that would involve a transfer to a non-whitelisted address are not permitted and will fail.
 
-For more discussion of this version of the protocol, please see this medium post: [CoinAlpha Releases KYC-Enabled Version of Basket Protocol](https://medium/finance-3). [TODO: UPDATE LINK]
+For more discussion of this version of the protocol, please see this medium post: [CoinAlpha Releases KYC-Enabled Version of Basket Protocol](https://medium.com/finance-3/coinalpha-releases-kyc-enabled-version-of-basket-protocol-10a99e3b13ac).
 
 
 ### KYC Whitelist Module
