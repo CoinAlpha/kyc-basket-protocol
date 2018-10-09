@@ -77,7 +77,7 @@ contract('Deployment costs', (accounts) => {
     });
 
     it('BasketEscrow cost', async () => {
-      basketFactory = await constructors.BasketEscrow(ADMIN, REGISTRY, KYC, ADMIN, TRANSACTION_FEE);
+      basketFactory = await constructors.BasketEscrow(ADMIN, REGISTRY, ADMIN, TRANSACTION_FEE);
     });
 
     it('BasketFactory cost', async () => {

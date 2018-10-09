@@ -23,10 +23,9 @@ const constructors = {
 
   BasketRegistry: _owner => allArtifacts.BasketRegistry.new(Object.assign({}, { from: _owner }, gasObj)),
 
-  BasketEscrow: (_owner, _basketRegistryAddress, _kycAddress, _transactionFeeRecipient, _transactionFee) =>
+  BasketEscrow: (_owner, _basketRegistryAddress, _transactionFeeRecipient, _transactionFee) =>
     allArtifacts.BasketEscrow.new(
       _basketRegistryAddress,
-      _kycAddress,
       _transactionFeeRecipient,
       _transactionFee,
       Object.assign({}, { from: _owner }, gasObj),

@@ -31,6 +31,14 @@ function whitelistHolder(address _addressToWhitelist) public onlyOwnerOrAdmin re
 function unWhitelistHolder(address _addressToUnwhitelist) public onlyOwnerOrAdmin returns (bool)
 ```
 
+**Dependencies on KYC.sol**
+
+The contracts which involve potential transfers of Baskets Tokens (namely [Basket.sol](contracts/Basket.sol) and [BasketEscrow.sol](contracts/BasketEscrow.sol)) connect to [KYC.sol](contracts/KYC.sol) to verify validity of the recipient Ethereum address.
+
+
+---
+
+
 ## Testing
 - [Truffle](http://truffleframework.com/) [v4.1.5](https://github.com/trufflesuite/truffle/releases/tag/v4.1.5)
 
@@ -53,7 +61,7 @@ $ npm test
 npm run coverage
 ```
 
-**Deployment**
+## Deployment
 
 - Specify `DEPLOYER_ADDRESS` and `KYC_ADMIN` address in [config.js](config.js)
 
