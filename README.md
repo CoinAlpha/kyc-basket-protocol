@@ -1,60 +1,53 @@
-# KYC Basket Protocol
+# Basket Protocol: KYC Version
 
-[![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=kyc-basket-protocol&build=4)](https://jenkins.coinalpha.com/job/kyc-basket-protocol/4/)
+[![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=kyc-basket-protocol)](https://jenkins.coinalpha.com/job/kyc-basket-protocol/)
 [![Coverage Status](https://coveralls.io/repos/github/CoinAlpha/kyc-basket-protocol/badge.svg?branch=master&t=VuHnjw)](https://coveralls.io/github/CoinAlpha/kyc-basket-protocol?branch=master)
 
-**A new paradigm for asset management**
+This branch builds off of CoinAlpha's base [Basket Protocol](https://github.com/CoinAlpha/basket-protocol).
 
-The Basket protocol establishes a decentralized ecosystem that trustlessly fulfills the primary functions of asset management: selection, execution, and custody. Unlike a traditional investment fund, a Basket is a non-custodial financial instrument collateralized by a portfolio of assets over which the investor has full control and agency.
+## Quick Reference
 
-**Roles in the Basket Protocol Ecosystem**
+Name | Description
+---|---
+[Basket Protocol](https://github.com/CoinAlpha/basket-protocol) | CoinAlpha's Basket Protocol used as a base for this repo.  For more information on the protocol's base functions, please go to the [Basket Protocol repo](https://github.com/CoinAlpha/basket-protocol).
+[CoinAlpha Releases KYC-Enabled Version of Basket Protocol](https://medium.com/finance-3/coinalpha-releases-kyc-enabled-version-of-basket-protocol-10a99e3b13ac) | Blog post discussing regulatory considerations and motivation for the creation of this KYC Version of the Basket Protocol.
+[KYC.sol](contracts/KYC.sol) | A new smart contract module introduced in this version of the Basket Protocol that implements whitelisting rules and functionality.
+`KYC Admin` | Ethereum address of a user, who in addition to the protocol creator/administrator, has the ability to whitelist Ethereum addresses.
 
-The Basket Protocol deconstructs the traditional asset management model into three functional roles, allowing for specialization, efficiency, and decentralization.  Market participants can act in any or all capacities.  Meanwhile, the protocol's registry capabilities facilitate the evaluation of and tracking of baskets as well as of the arrangers that created them.
+## Overview
+This KYC version of the Basket Protocol adds whitelisting functionality: a protocol administrator (`owner`) and another authorized party, the `KYC Admin`, have the ability to whitelist Ethereum addresses that will be permitted to hold Basket Tokens.
 
-- **Arranger**: "fund manager" in the traditional sense, that selects tokens and weights for basket contracts
-- **Supplier**: accumulates ERC20 tokens for compiling into baskets and "minting" of basket tokens
-- **Buyer**: the ultimate holder of the basket token, who owns and controls the basket tokens and the underlying ERC20 tokens they represent
+Only Ethereum addresses that have been whitelisted will be able to hold Basket Tokens; any transfers to or transactions that would involve a transfer to a non-whitelisted address are not permitted and will fail.
 
-## Basket Protocol Contract Suite
 
-**[Basket Contract](contracts/Basket.sol)**
+### KYC Whitelist Module
 
-The fundamental building block of the Basket Protocol, a Basket Contract is an extended ERC20 token contract capable of holding and transacting in other ERC20 tokens.  In addition to the basic [ERC20 token specifications](https://en.wikipedia.org/wiki/ERC20), the basket contract adds the following functionality:
+The [KYC.sol](contracts/KYC.sol) contract is introduced in this version of the Basket Protocol to implement the whitelisting functionality.
+
+The main functions are summarized below:
 
 ```js
-// Deposit ERC20 tokens into the basket contract and "mint" new Basket ERC20
-// tokens that represent the underlying tokens
-function depositAndBundle(uint _quantity) public payable returns (bool success)
+// Query if an address is whitelisted
+function isWhitelistedHolder(address _holder) public view returns (bool)
 ```
 
 ```js
-// Extract the underlying ERC20 tokens and "burning" the Basket token
-function debundleAndWithdraw(uint _quantity) public returns (bool success)
+// Function to whitelist an Ethereum address
+function whitelistHolder(address _addressToWhitelist) public onlyOwnerOrAdmin returns (bool) 
 ```
 
-A holder of a basket token issued by a Basket Contract has direct control over and agency of the underlying ERC20 tokens represented by the basket token.  The Basket Contract ensures that the tokens represented by a basket token are always held by the Basket Contract, readily available for any holder who wants to debundle and assume direct ownership of the underlying tokens, at any time.
+```js
+// Function to remove an address from the whitelist
+function unWhitelistHolder(address _addressToUnwhitelist) public onlyOwnerOrAdmin returns (bool)
+```
 
-**[Basket Factory](contracts/BasketFactory.sol)**
+**Dependencies on KYC.sol**
 
-Contract that allows Arrangers to construct new ERC20 token portfolios by creating new Basket Contracts.  When constructing new baskets, Arrangers specify tokens and weights, creating a "template" for minting new Basket tokens from that basket.
+The contracts which involve potential transfers of Baskets Tokens (namely [Basket.sol](contracts/Basket.sol) and, indirectly, [BasketEscrow.sol](contracts/BasketEscrow.sol) - via its interaction with [Basket.sol](contracts/Basket.sol)) connect to [KYC.sol](contracts/KYC.sol) to verify validity of the recipient Ethereum address.
 
-**[Basket Registry](contracts/BasketRegistry.sol)**
 
-A registry to keep track of baskets created, quantity of each basket minted and burned, as well as usage of a particular arranger's baskets.
+---
 
-**[Basket Escrow](contracts/BasketEscrow.sol)**
-
-Allows for users to create buy and sell orders for baskets, fill orders, and transact in Ether.
-
-## Coding Guides
-- [http://solidity.readthedocs.io/en/develop/style-guide.html](http://solidity.readthedocs.io/en/develop/style-guide.html)
-
-## Solidity Compiler
-
-The basket protocol uses [Solidity 0.4.21](https://solidity.readthedocs.io/en/v0.4.20/contracts.html#events).
-
-- Introduces "`emit` LogEvent" syntax
-- Note on 0.4.22: compiler version has been downgraded to 0.4.21 due to potential errors related to ERC20 tokens introduced in 0.4.22 ([read more](https://medium.com/@chris_77367/explaining-unexpected-reverts-starting-with-solidity-0-4-22-3ada6e82308c))
 
 ## Testing
 - [Truffle](http://truffleframework.com/) [v4.1.5](https://github.com/trufflesuite/truffle/releases/tag/v4.1.5)
@@ -78,7 +71,7 @@ $ npm test
 npm run coverage
 ```
 
-**Deployment**
+## Deployment
 
 - Specify `DEPLOYER_ADDRESS` and `KYC_ADMIN` address in [config.js](config.js)
 
@@ -95,15 +88,11 @@ The CoinAlpha team, to the extent possible, aims to follow industry best practic
 - [OpenZeppelin contracts](https://github.com/OpenZeppelin/zeppelin-solidity): the Basket Protocol uses some of the standardized and widely accepted OpenZeppelin contracts
 - [ConsenSys: Smart Contract Security Best Practices](https://github.com/ConsenSys/smart-contract-best-practices)
 
-### [Hosho](https://hosho.io) Security Audit
-![Hosho Audited](image/hosho.png)
-- In July 2018, we hired Hosho, a global leader in blockchain security.
-- Our protocol passed Hosho's comprehensive audit.  The full report can be found here: [Hosho Security Audit Report](files/hosho-basket-audit.pdf).
 
 ### 🐞 Bug Bounty Program
 We are also running a bug bounty program.
 If you find a security issue, please email [dev@coinalpha.com](mailto:dev@coinalpha.com).
-For more information on the Bug Bounty program, click here: [Basket Protocol Bug Bounty Program](https://medium.com/finance-3)
+For more information on the Bug Bounty program, click here: [Basket Protocol Bug Bounty Program](https://medium.com/finance-3/cryptobaskets-hosho-security-audit-bug-bounty-program-24311c22a9d6)
 
 
 ## Contributions Are Welcome!

@@ -24,6 +24,11 @@ import "./zeppelin/ERC20.sol";
 import "./BasketRegistry.sol";
 import "./KYC.sol";
 
+contract IBasket {
+  // Called by BasketEscrow
+  function isWhitelistedHolder(address _address) public view returns (bool) {}
+}
+
 /// @title Basket -- Basket contract for bundling and debundling tokens
 /// @author CoinAlpha, Inc. <contact@coinalpha.com>
 contract Basket is StandardToken {
@@ -52,6 +57,12 @@ contract Basket is StandardToken {
   // Modifiers
   modifier onlyArranger {
     require(msg.sender == arranger);                // Check: "Only the Arranger can call this function"
+    _;
+  }
+
+  /// @dev For transactions resulting in token transfers, check that the token recipient is whitelisted
+  modifier onlyWhitelistedHolder(address _to) {
+    require(isWhitelistedHolder(_to));
     _;
   }
 
@@ -109,8 +120,7 @@ contract Basket is StandardToken {
   /// @dev Combined deposit of all component tokens (not yet deposited) and bundle
   /// @param  _quantity                            Quantity of basket tokens to mint
   /// @return success                              Operation successful
-  function depositAndBundle(uint _quantity) public payable returns (bool success) {
-    if (kycEnabled) require(kyc.isWhitelistedHolder(msg.sender));
+  function depositAndBundle(uint _quantity) public onlyWhitelistedHolder(msg.sender) payable returns (bool success) {
 
     for (uint i = 0; i < tokens.length; i++) {
       address t = tokens[i];
@@ -231,8 +241,7 @@ contract Basket is StandardToken {
   /// @param  _to                                  receiver
   /// @param  _value                               value to be transferred
   /// @return success                              Operation successful
-  function transfer(address _to, uint256 _value) public returns (bool) {
-    if (kycEnabled) require(kyc.isWhitelistedHolder(_to));
+  function transfer(address _to, uint256 _value) public onlyWhitelistedHolder(_to) returns (bool) {
     super.transfer(_to, _value);
     return true;
   }
@@ -242,10 +251,19 @@ contract Basket is StandardToken {
   /// @param  _to                                  receiver
   /// @param  _value                               value to be transferred
   /// @return success                              Operation successful
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    if (kycEnabled) require(kyc.isWhitelistedHolder(_to));
+  function transferFrom(address _from, address _to, uint256 _value) public onlyWhitelistedHolder(_to) returns (bool) {
     super.transferFrom(_from, _to, _value);
     return true;
+  }
+
+  /// @dev Check if the basket is kycEnabled and if _address is whitelisted
+  /// @return isWhitelisted                        Return if holder is whitelisted
+  function isWhitelistedHolder(address _address) public view returns (bool) {
+    if (kycEnabled) {
+      return kyc.isWhitelistedHolder(_address);
+    } else {
+      return true;
+    }
   }
 
   /// @dev Fallback to reject any ether sent to contract

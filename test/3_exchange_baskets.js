@@ -49,10 +49,12 @@ contract('Basket Escrow', (accounts) => {
       tokenA = await constructors.TestToken(...tokenParamsA);
       tokenB = await constructors.TestToken(...tokenParamsB);
 
-      await kyc.whitelistHolder(basketEscrow.address);
-      await kyc.whitelistHolder(MARKET_MAKER);
-      await kyc.whitelistHolder(HOLDER_A);
-      await kyc.whitelistHolder(HOLDER_B);
+      await Promise.all([
+        kyc.whitelistHolder(basketEscrow.address),
+        kyc.whitelistHolder(MARKET_MAKER),
+        kyc.whitelistHolder(HOLDER_A),
+        kyc.whitelistHolder(HOLDER_B),
+      ]);
     } catch (err) { assert.throw(`Failed to deploy contracts: ${err.toString()}`); }
   });
 

@@ -51,7 +51,7 @@ contract KYC is Ownable {
 
   /// @dev Check if address is a whitelisted holder
   /// @param  _holder                              holder address
-  /// @return success                              is whitelisted
+  /// @return isWhitelisted                        is whitelisted
   function isWhitelistedHolder(address _holder) public view returns (bool) {
     return whitelistedHolders[_holder];
   }
