@@ -1,5 +1,7 @@
 # Basket Protocol: KYC Version
 
+![KYC Basket Protocol](image/kyc-basket.png)
+
 [![Build Status](https://jenkins.coinalpha.com/buildStatus/icon?job=kyc-basket-protocol)](https://jenkins.coinalpha.com/job/kyc-basket-protocol/)
 [![Coverage Status](https://coveralls.io/repos/github/CoinAlpha/kyc-basket-protocol/badge.svg?branch=master&t=VuHnjw)](https://coveralls.io/github/CoinAlpha/kyc-basket-protocol?branch=master)
 
